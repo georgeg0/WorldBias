@@ -14,7 +14,7 @@ setwd("/Documents/WorldBias")
 
 # ---------- get data
 #Reading the consolidated CSV file
-gtd <- read.csv("Data/Race.IAT.2004-2015.cleansed.csv")
+gtd <- read.csv("Data/Race.IAT.2004-2015-V1.csv")
 
 # ---------- data munging
 gtd.recent <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
