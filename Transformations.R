@@ -1,4 +1,4 @@
-###### Reading raw data files (spss) to convert it to csv ######
+###### Reading raw data files (spss) to convert it to consolidated refined csv file ######
 
 # Citation for data
 # Xu, K., Nosek, B., & Greenwald, A. (2014). Psychology data from the race implicit association test on the project implicit demo website. Journal of Open Psychology Data, 2(1).
@@ -37,13 +37,20 @@ if(TRUE) {
 
 if(!require(memisc)){install.packages("memisc", repos="http://R-Forge.R-project.org")} 
 library("memisc")
-dataset1 <- data.frame(as.data.set(spss.system.file(file.path(dataloc,'Race IAT.public.2015.sav'))))
-
-#Get the fields that you are interested in
-#For some reason this first column was not capitalised in my data
-datafile2015="Race.IAT.public.2015.csv"
-dd <- dataset1[,c("d_biep.white_good_all","countrycit","countryres","raceomb","raceombmulti","ethnicityomb")]
-write.csv(dd, file=file.path('data',datafile2015))
+fileNames <- Sys.glob(paste("*.", "sav", sep = ""))
+fileNumbers <- seq(fileNames)
+# Loop for..
+# 1) Iteratively get all the raw statistical file from 'raw' folder 
+# 2) Generate csv file and put under 'data' folder for further processing
+for (fileNumber in fileNumbers)
+{
+  csvFileName <-  paste(sub(paste("\\.", "sav", sep = ""), "", fileNames[fileNumber]),".", "csv", sep = "")
+  dataset1 <- data.frame(as.data.set(spss.system.file(file.path(dataloc,fileNames[fileNumber]))))
+  #Get the fields that you are interested in
+  #For some reason this first column was not capitalised in my data
+  dd <- dataset1[,c("d_biep.white_good_all","countrycit","countryres","raceomb","raceombmulti","ethnicityomb")]
+  write.csv(dd, file=file.path('data',csvFileName))
+}
 
 #race = White:6, ethnicity = White:5
 
