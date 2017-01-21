@@ -1,23 +1,38 @@
-# Initial Cut of World Implicit Bias Project
+# Mapping the World's Implicit Bias 
 # (c) George Gittu & Tom Stafford 2016
 
 # ----------libraries
 
-library(rgdal)        #for readOGR
-library(ggplot2)
-library(foreign)
-library(plyr)
-library(raster)
+if(!require(rgdal)){install.packages('rgdal')} 
+#if you are on linux this may not be as straightfoward. This may help:
+# https://philmikejones.wordpress.com/2014/07/14/installing-rgdal-in-r-on-linux/
+# https://stackoverflow.com/questions/15248815/rgdal-package-installation
+library(rgdal)        #for readOGR, see https://cran.r-project.org/package=rgdal
+
+if(!require(ggplot2)){install.packages('ggplot2')} 
+library(ggplot2) # graphing package
+
+if(!require(plyr)){install.packages('plyr')} 
+library(plyr) # revalue
+
+#library(foreign) #commented because I couldn't see what this was for
+#library(raster) #commented because I couldn't see what this was for
 
 # ---------- Setting Path
-setwd("/Documents/WorldBias")
+if(Sys.info()[[4]]=="tom-vaio") {
+    setwd("/home/tom/Desktop/WorldBias") #tom's laptop
+} else { 
+    setwd("/Documents/WorldBias")
+}
 
 # ---------- get data
-#Reading the consolidated CSV file
+#Reading the consolidated CSV file, IAT scores for individuals and their country codes
 gtd <- read.csv("Data/Race.IAT.2004-2015-V1.csv")
+cat("total sample size = ", nrow(gtd), "\n")
 
-# ---------- data munging
-gtd.recent <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
+# ---------- data munging: find average for each country
+gtd.recent <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean) #means
+gtd.counts <- aggregate(D_biep.White_Good_all~countrycit,gtd,length) #sample size
 
 # --------- draw map
 world <- readOGR(dsn=path.expand("WorldMapShapes"),layer="world_country_admin_boundary_shapefile_with_fips_codes")
@@ -33,3 +48,6 @@ map.df <- merge(map.df,countries, by="id")
 
 ggplot(map.df, aes(x=long,y=lat,group=group)) +
   geom_polygon(aes(fill=D_biep.White_Good_all))
+
+# -------- save as PNG 
+ggsave(filename="IATmap.png")
