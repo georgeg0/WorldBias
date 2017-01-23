@@ -1,1 +1,0 @@
-ethnic	ethniccode1	American Indian/Alaska Native2	East Asian3	South Asian4	Native Hawaiian or other Pacific Islander5	Black or African American6	White7	More than one race - Black/White8	More than one race - Other9	Other or Unknown
