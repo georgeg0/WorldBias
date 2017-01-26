@@ -52,7 +52,6 @@ map.df <- fortify(world)
 map.df <- merge(map.df,countries, by="id")
 MapDraw <- ggplot(data = map.df, aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all))+
   geom_polygon()  +
-  geom_text(data = map.df, aes(label = FIPS_CNTRY, x=long, y=lat))+
   coord_equal() +
   theme(axis.title = element_blank(), axis.text = element_blank()) + scale_fill_gradient(high = "springgreen4", low= "grey90",limits = c(.29, .45))+
   labs(title = Maptitle, fill = "IAT Score")
