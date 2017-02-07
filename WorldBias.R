@@ -23,7 +23,11 @@ if(whichmap == "EUROPE") {
   world      <- readOGR(dsn=path.expand("/Users/ggittu/Downloads/europenew"),layer="Europe")
   
   # Reevaluating country codes to match the country code in IAT file
-  world@data$ORGN_NAME <- as.character (revalue(world@data$ORGN_NAME, replace=c("Shqipëria"="AL","Andorra"="AD","Österreich"="AT","België / Belgique"="BE","Bosna i Hercegovina"="BA","Hrvatska"="HR","Cesko"="CZ","Danmark"="DK","Eesti"="EE","Suomi"="FI","France"="FR","Deutschland"="DE","Elláda"="GR","Magyarország"="HU","Éire / Ireland"="IE","Italia"="IT","Latvija"="LV","Liechtenstein"="LI","Lietuva"="LT","Lëtzebuerg / Luxemburg / Luxembourg"="LU","Makedonija"="MK","Malta"="MT","Monaco"="MN","Crna Gora"="ME","Nederland"="NL","Norge"="NO","Polska"="PL","Portugal"="PT","San Marino"="SM","Srbija"="RS","Slovensko"="SK","Slovenija"="SI","España"="ES","Sverige"="SE","Schweiz / Suisse / Svizerra / Svizra"="CH","United Kingdom"="UK","Belarus"="BY","Balgarija"="BG","Ísland"="IS","Moldova"="MD","România"="RO","Ukrajina"="UA","Rossíya"="RU")))
+  world@data$ORGN_NAME <- as.character (revalue(world@data$ORGN_NAME, replace=c("Shqipëria"="AL","Andorra"="AD","Österreich"="AT","België / Belgique"="BE","Bosna i Hercegovina"="BA","Hrvatska"="HR","Cesko"="CZ","Danmark"="DK","Eesti"="EE","Suomi"="FI","France"="FR","Deutschland"="DE","Elláda"="GR","Magyarország"="HU","Éire / Ireland"="IE","Italia"="IT","Latvija"="LV","Liechtenstein"="LI","Lietuva"="LT","Lëtzebuerg / Luxemburg / Luxembourg"="LU","Makedonija"="MK","Malta"="MT","Monaco"="MC","Crna Gora"="ME","Nederland"="NL","Norge"="NO","Polska"="PL","Portugal"="PT","San Marino"="SM","Srbija"="RS","Slovensko"="SK","Slovenija"="SI","España"="ES","Sverige"="SE","Schweiz / Suisse / Svizerra / Svizra"="CH","United Kingdom"="UK","Belarus"="BY","Balgarija"="BG","Ísland"="IS","Moldova"="MD","România"="RO","Ukrajina"="UA","Rossíya"="RU")))
+  # these countries need to be revisited, with better understanding
+  # Gibraltar (UK) ,Guernsey (UK),Isle of Man (UK),Jersey (UK),Armenia, Azerbaijan, Faeroe Islands (Denmark), Jan Mayen (Norway), Svalbard (Norway), Turkey
+  # need to revisit Andorra AN, in code book Netherlands Antilles
+  world@data$ORGN_NAME <- as.character (revalue(world@data$ORGN_NAME, replace=c("Gibraltar (UK)"="","Guernsey (UK)"="","Isle of Man (UK)"="","Jersey (UK)"="","Hayastan"="","Azerbaycan"="","Foroyar (Danmark)"="","Sakartvelo"="","Jan Mayen (Norge)"="","Svalbard (Norge)"="","Türkiye"="")))
   colnames(world@data)[which(names(world@data) == "ORGN_NAME")] <- "FIPS_CNTRY"
 } else { 
   # ---------- Setting Path
@@ -41,19 +45,30 @@ if(whichmap == "EUROPE") {
 
 # ---------- data munging
 gtd.recent <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
+# Renaming for merging
+colnames(gtd.recent)[which(names(gtd.recent) == "countrycit")] <- "FIPS_CNTRY"
 
 # --------- draw map
 ggplot() +  geom_polygon(data=world, aes(x=long, y=lat, group=group))
 countries <- world@data
 countries <- cbind(id=rownames(countries),countries)
 countries <- merge(countries,gtd.recent, 
-                   by.x="FIPS_CNTRY", by.y="countrycit", all.x=T)
+                   by.x="FIPS_CNTRY", by.y="FIPS_CNTRY", all.x=T)
 map.df <- fortify(world)
 map.df <- merge(map.df,countries, by="id")
-MapDraw <- ggplot(data = map.df, aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all))+
-  geom_polygon()  +
+
+# ---------- Creating and centering labels
+CountryLabel <- ddply(map.df,"FIPS_CNTRY", summarise, long = mean(long), lat = mean(lat))
+CountryLabel <- na.omit(CountryLabel)
+CountryLabelIat <- merge(CountryLabel,gtd.recent)
+
+MapDraw <- ggplot(data = map.df)+
+  geom_polygon(aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all),color = "gray30",size=.05)+
   coord_equal() +
-  theme(axis.title = element_blank(), axis.text = element_blank()) + scale_fill_gradient(high = "springgreen4", low= "grey90",limits = c(.29, .45))+
+  theme(axis.title = element_blank(), axis.text = element_blank()) +
+  scale_fill_gradientn(colours=c("steelblue4","skyblue","lightblue","salmon","red3","indianred4"), limits = c(.29, .45))+
+  geom_text(aes(x=long, y=lat, label=FIPS_CNTRY), data=CountryLabel, col="black", cex=2.5,fontface = "bold")+
+  geom_text(aes(x=long, y=lat-.5, label=round(D_biep.White_Good_all,digits = 3)), data=CountryLabelIat, col="black", cex=1.5,fontface = "italic")+
   labs(title = Maptitle, fill = "IAT Score")
 
 print(MapDraw)
