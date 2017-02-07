@@ -3,3 +3,20 @@ This project is inspired from the data visualization featured in Washigton Post 
 spss file need to be downloaded from https://osf.io/52qxl/ for each individual year from 2004 to 2015
 
 To switch between maps, “EUROPE” draws Europe map and “WORLD” draws world map. These change need to be added to WorldBias.R
+
+EUROPE Implicit Bias Map
+
+![Alt text](/EuropeMap.png?raw=true "World Bias")
+
+World Implicit Bias Map
+
+![Alt text](/Rplot.jpeg?raw=true "World Bias")
+
+![Alt text](/Europev1.png?raw=true "World Bias")
+
+
+
+
+
+
+
