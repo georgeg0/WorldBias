@@ -8,6 +8,9 @@ library(ggplot2)
 library(foreign)
 library(plyr)
 library(raster)
+library(maps)
+library(mapdata)
+library(modify)
 
 #Give which map to draw WORLD or EUROPE map
 whichmap = "EUROPE"
@@ -20,15 +23,29 @@ if(whichmap == "EUROPE") {
   # ---------- get data
   #Reading the consolidated CSV file
   gtd <- read.csv("Race.IAT.2004-2015-white-europe.csv")
-  world      <- readOGR(dsn=path.expand("/Users/ggittu/Downloads/europenew"),layer="Europe")
   
-  # Reevaluating country codes to match the country code in IAT file
-  world@data$ORGN_NAME <- as.character (revalue(world@data$ORGN_NAME, replace=c("Shqipëria"="AL","Andorra"="AD","Österreich"="AT","België / Belgique"="BE","Bosna i Hercegovina"="BA","Hrvatska"="HR","Cesko"="CZ","Danmark"="DK","Eesti"="EE","Suomi"="FI","France"="FR","Deutschland"="DE","Elláda"="GR","Magyarország"="HU","Éire / Ireland"="IE","Italia"="IT","Latvija"="LV","Liechtenstein"="LI","Lietuva"="LT","Lëtzebuerg / Luxemburg / Luxembourg"="LU","Makedonija"="MK","Malta"="MT","Monaco"="MC","Crna Gora"="ME","Nederland"="NL","Norge"="NO","Polska"="PL","Portugal"="PT","San Marino"="SM","Srbija"="RS","Slovensko"="SK","Slovenija"="SI","España"="ES","Sverige"="SE","Schweiz / Suisse / Svizerra / Svizra"="CH","United Kingdom"="UK","Belarus"="BY","Balgarija"="BG","Ísland"="IS","Moldova"="MD","România"="RO","Ukrajina"="UA","Rossíya"="RU")))
-  # these countries need to be revisited, with better understanding
-  # Gibraltar (UK) ,Guernsey (UK),Isle of Man (UK),Jersey (UK),Armenia, Azerbaijan, Faeroe Islands (Denmark), Jan Mayen (Norway), Svalbard (Norway), Turkey
-  # need to revisit Andorra AN, in code book Netherlands Antilles
-  world@data$ORGN_NAME <- as.character (revalue(world@data$ORGN_NAME, replace=c("Gibraltar (UK)"="","Guernsey (UK)"="","Isle of Man (UK)"="","Jersey (UK)"="","Hayastan"="","Azerbaycan"="","Foroyar (Danmark)"="","Sakartvelo"="","Jan Mayen (Norge)"="","Svalbard (Norge)"="","Türkiye"="")))
-  colnames(world@data)[which(names(world@data) == "ORGN_NAME")] <- "FIPS_CNTRY"
+  # Creating a list of European countries
+  eu <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", 
+          "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", 
+          "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", 
+          "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", 
+          "Slovenia", "Spain", "Sweden", "UK","Albania","Andorra","Armenia","Azerbaijan","Belarus","Bosnia and Herzegovina",
+          "Georgia","Iceland","Kazakhstan","Kosovo","Liechtenstein","Macedonia","Moldova",
+          "Monaco","Montenegro","Norway","San Marino","Serbia","Switzerland","Turkey","Ukraine")
+  
+  # creating a Europe map from the world map
+  europe <- map_data('world', region=eu)
+  
+  # Reevaluating country name to FIPS code to match the country code in IAT file
+  europe$region <- as.character (revalue(europe$region, replace=c("Austria"="AT", "Belgium"="BE", "Bulgaria"="BG", "Croatia"="HR", "Cyprus"="CY", "Czech Republic"="CZ", 
+                                                                  "Denmark"="DK", "Estonia"="EE", "Finland"="FI", "France"="FR", "Germany"="DE", "Greece"="GR", 
+                                                                  "Hungary"="HU", "Ireland"="IE", "Italy"="IT", "Latvia"="LV", "Lithuania"="LT", "Luxembourg"="LU", 
+                                                                  "Malta"="MT", "Netherlands"="NL", "Poland"="PL", "Portugal"="PT", "Romania"="RO", "Slovakia"="SK", 
+                                                                  "Slovenia"="SI", "Spain"="ES", "Sweden"="SE",
+                                                                  "Albania"="AL","Andorra"="AD","Armenia"="AM","Azerbaijan"="AZ","Belarus"="BY","Bosnia and Herzegovina"="BA",
+                                                                  "Georgia"="GE","Iceland"="IS","Kazakhstan"="KZ","Liechtenstein"="LI","Macedonia"="MK","Moldova"="MD",
+                                                                  "Monaco"="MC","Montenegro"="ME","Norway"="NO","San Marino"="SM","Serbia"="RS","Switzerland"="CH","Turkey"="TR","Ukraine"="UA"))) 
+  colnames(europe)[which(names(europe) == "region")] <- "FIPS_CNTRY"
 } else { 
   # ---------- Setting Path
   setwd("/george/Desktop/RACIAL-IAT/data/cleansedtest")
@@ -49,26 +66,24 @@ gtd.recent <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
 colnames(gtd.recent)[which(names(gtd.recent) == "countrycit")] <- "FIPS_CNTRY"
 
 # --------- draw map
-ggplot() +  geom_polygon(data=world, aes(x=long, y=lat, group=group))
-countries <- world@data
-countries <- cbind(id=rownames(countries),countries)
-countries <- merge(countries,gtd.recent, 
-                   by.x="FIPS_CNTRY", by.y="FIPS_CNTRY", all.x=T)
-map.df <- fortify(world)
-map.df <- merge(map.df,countries, by="id")
+ggplot() +  geom_polygon(data=europe, aes(x=long, y=lat, group=group))
+map.df = merge(europe, gtd.recent, by = "FIPS_CNTRY")
+map.df = map.df[order(map.df$order),]
 
-# ---------- Creating and centering labels
+# ---------- For labelling countries and IAT score
 CountryLabel <- ddply(map.df,"FIPS_CNTRY", summarise, long = mean(long), lat = mean(lat))
-CountryLabel <- na.omit(CountryLabel)
 CountryLabelIat <- merge(CountryLabel,gtd.recent)
 
-MapDraw <- ggplot(data = map.df)+
-  geom_polygon(aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all),color = "gray30",size=.05)+
+MapDraw <- ggplot(data = map.df)+ 
+  geom_polygon(aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all),color = "gray30",size=.05) +
   coord_equal() +
-  theme(axis.title = element_blank(), axis.text = element_blank()) +
-  scale_fill_gradientn(colours=c("steelblue4","skyblue","lightblue","salmon","red3","indianred4"), limits = c(.29, .45))+
-  geom_text(aes(x=long, y=lat, label=FIPS_CNTRY), data=CountryLabel, col="black", cex=2.5,fontface = "bold")+
-  geom_text(aes(x=long, y=lat-.5, label=round(D_biep.White_Good_all,digits = 3)), data=CountryLabelIat, col="black", cex=1.5,fontface = "italic")+
-  labs(title = Maptitle, fill = "IAT Score")
+  #barbit to fit output guide_colorbar(barwidth=40,barheight = .5) #values for full view guide_colorbar(barwidth=72,barheight = .8)
+  #legend.position=c(.5, 1)
+  theme(axis.title = element_blank(),plot.title=element_text(vjust=-40,hjust=.1,size=25,face="bold"), axis.text = element_blank(),legend.position=c(.5, 1),legend.direction="horizontal")+guides(fill = guide_colorbar(barwidth=46,barheight = .8)) +
+  scale_fill_gradientn(colours=c("steelblue4","steelblue3","steelblue1","snow3","firebrick1","firebrick3","firebrick4"), limits = c(.29, .45),breaks= c(.29, .37,.45))+
+  geom_text(aes(x=long, y=lat-.5, label=round(D_biep.White_Good_all,digits = 3)), data=CountryLabelIat, col="black", cex=2.75,fontface = "bold")+
+  geom_text(aes(x=long, y=lat, label=FIPS_CNTRY), data=CountryLabel, col="black", cex=3.75,fontface = "bold")+
+  labs(title = "Mean IAT Scores of \nWhite Participants", fill = "") +
+  coord_map(xlim = c(-25, 40),ylim = c(33, 72))
 
 print(MapDraw)
