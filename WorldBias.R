@@ -70,9 +70,32 @@ ggplot() +  geom_polygon(data=europe, aes(x=long, y=lat, group=group))
 map.df = merge(europe, gtd.recent, by = "FIPS_CNTRY")
 map.df = map.df[order(map.df$order),]
 
-# ---------- For labelling countries and IAT score
+# ---------- Creating and centering labels
 CountryLabel <- ddply(map.df,"FIPS_CNTRY", summarise, long = mean(long), lat = mean(lat))
 CountryLabelIat <- merge(CountryLabel,gtd.recent)
+
+# ---------- Minor adjustment of labels that dint align to centre
+#library(devtools)
+#install_github(repo = "modify", username = "skranz") ## Making using of a custom repo make sure to have devtools
+# 
+modify(CountryLabel,FIPS_CNTRY=="SE", long=long-2)
+modify(CountryLabelIat,FIPS_CNTRY=="SE", long=long-2)
+modify(CountryLabel,FIPS_CNTRY=="FI", long=long+2)
+modify(CountryLabelIat,FIPS_CNTRY=="FI", long=long+2)
+modify(CountryLabel,FIPS_CNTRY=="EE", long=long+1.5)
+modify(CountryLabelIat,FIPS_CNTRY=="EE", long=long+1.5)
+modify(CountryLabel,FIPS_CNTRY=="IT", long=long+2)
+modify(CountryLabelIat,FIPS_CNTRY=="IT", long=long+2)
+modify(CountryLabel,FIPS_CNTRY=="GR", long=long-2)
+modify(CountryLabelIat,FIPS_CNTRY=="GR", long=long-2)
+modify(CountryLabel,FIPS_CNTRY=="HR", lat=lat+1)
+modify(CountryLabelIat,FIPS_CNTRY=="HR", lat=lat+1)
+modify(CountryLabel,FIPS_CNTRY=="NO", lat=lat-8)
+modify(CountryLabelIat,FIPS_CNTRY=="NO", lat=lat-8)
+modify(CountryLabel,FIPS_CNTRY=="NO", long=long-6)
+modify(CountryLabelIat,FIPS_CNTRY=="NO", long=long-6)
+modify(CountryLabel,FIPS_CNTRY=="IS", long=long+1.5)
+modify(CountryLabelIat,FIPS_CNTRY=="IS", long=long+1.5)
 
 MapDraw <- ggplot(data = map.df)+ 
   geom_polygon(aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all),color = "gray30",size=.05) +
