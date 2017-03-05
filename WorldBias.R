@@ -27,24 +27,26 @@ if(whichmap == "EUROPE") {
   # Creating a list of European countries
   eu <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", 
           "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", 
-          "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", 
+          "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", 
           "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", 
-          "Slovenia", "Spain", "Sweden", "UK","Albania","Andorra","Armenia","Azerbaijan","Belarus","Bosnia and Herzegovina",
-          "Georgia","Iceland","Kazakhstan","Kosovo","Liechtenstein","Macedonia","Moldova",
-          "Monaco","Montenegro","Norway","San Marino","Serbia","Switzerland","Turkey","Ukraine")
+          "Slovenia", "Spain", "Sweden", "UK","Albania","Armenia","Azerbaijan","Belarus","Bosnia and Herzegovina",
+          "Georgia","Iceland","Kazakhstan","Kosovo","Macedonia","Moldova",
+          "Norway","Serbia","Switzerland","Turkey","Ukraine")
   
   # creating a Europe map from the world map
   europe <- map_data('world', region=eu)
   
   # Reevaluating country name to FIPS code to match the country code in IAT file
+  # Taking out these countries as n < 100
+  #"San Marino"="SM","Monaco"="MC","Liechtenstein"="LI","Montenegro"="ME","Andorra"="AD","Luxembourg"="LU", AN is netherlands Antilles
   europe$region <- as.character (revalue(europe$region, replace=c("Austria"="AT", "Belgium"="BE", "Bulgaria"="BG", "Croatia"="HR", "Cyprus"="CY", "Czech Republic"="CZ", 
                                                                   "Denmark"="DK", "Estonia"="EE", "Finland"="FI", "France"="FR", "Germany"="DE", "Greece"="GR", 
-                                                                  "Hungary"="HU", "Ireland"="IE", "Italy"="IT", "Latvia"="LV", "Lithuania"="LT", "Luxembourg"="LU", 
+                                                                  "Hungary"="HU", "Ireland"="IE", "Italy"="IT", "Latvia"="LV", "Lithuania"="LT", 
                                                                   "Malta"="MT", "Netherlands"="NL", "Poland"="PL", "Portugal"="PT", "Romania"="RO", "Slovakia"="SK", 
                                                                   "Slovenia"="SI", "Spain"="ES", "Sweden"="SE",
-                                                                  "Albania"="AL","Andorra"="AD","Armenia"="AM","Azerbaijan"="AZ","Belarus"="BY","Bosnia and Herzegovina"="BA",
-                                                                  "Georgia"="GE","Iceland"="IS","Kazakhstan"="KZ","Liechtenstein"="LI","Macedonia"="MK","Moldova"="MD",
-                                                                  "Monaco"="MC","Montenegro"="ME","Norway"="NO","San Marino"="SM","Serbia"="RS","Switzerland"="CH","Turkey"="TR","Ukraine"="UA"))) 
+                                                                  "Albania"="AL","Armenia"="AM","Azerbaijan"="AZ","Belarus"="BY","Bosnia and Herzegovina"="BA",
+                                                                  "Georgia"="GE","Iceland"="IS","Kazakhstan"="KZ","Macedonia"="MK","Moldova"="MD",
+                                                                  "Norway"="NO","Serbia"="RS","Switzerland"="CH","Turkey"="TR","Ukraine"="UA"))) 
   colnames(europe)[which(names(europe) == "region")] <- "FIPS_CNTRY"
 } else { 
   # ---------- Setting Path
