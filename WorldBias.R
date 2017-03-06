@@ -11,6 +11,8 @@ library(raster)
 library(maps)
 library(mapdata)
 library(modify)
+library(gridExtra)
+library(cowplot)
 
 #Give which map to draw WORLD or EUROPE map
 whichmap = "EUROPE"
@@ -99,16 +101,25 @@ modify(CountryLabelIat,FIPS_CNTRY=="NO", long=long-6)
 modify(CountryLabel,FIPS_CNTRY=="IS", long=long+1.5)
 modify(CountryLabelIat,FIPS_CNTRY=="IS", long=long+1.5)
 
+constat <- read.csv("Consolidatedstat.2004-2015-white-europe.csv")
+constat <- constat[-c(42,27,23,3,29,1,25), ]
+countryfreqtable <- cbind(constat[,c(1,4)])
+colnames(countryfreqtable) <- c("Country", "n")
+
 MapDraw <- ggplot(data = map.df)+ 
   geom_polygon(aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all),color = "gray30",size=.05) +
   coord_equal() +
-  #barbit to fit output guide_colorbar(barwidth=40,barheight = .5) #values for full view guide_colorbar(barwidth=72,barheight = .8)
-  #legend.position=c(.5, 1)
-  theme(axis.title = element_blank(),plot.title=element_text(vjust=-40,hjust=.1,size=25,face="bold"), axis.text = element_blank(),legend.position=c(.5, 1),legend.direction="horizontal")+guides(fill = guide_colorbar(barwidth=46,barheight = .8)) +
+  theme(axis.title = element_blank(),plot.title=element_text(vjust=-40,hjust=.1,size=25,face="bold"), axis.text = element_blank(),legend.position=c(.5, 1),legend.direction="horizontal",panel.background = element_rect(fill = 'honeydew'))+guides(fill = guide_colorbar(barwidth=47.5,barheight = .8)) +
   scale_fill_gradientn(colours=c("steelblue4","steelblue3","steelblue1","snow3","firebrick1","firebrick3","firebrick4"), limits = c(.29, .45),breaks= c(.29, .37,.45))+
   geom_text(aes(x=long, y=lat-.5, label=round(D_biep.White_Good_all,digits = 3)), data=CountryLabelIat, col="black", cex=2.75,fontface = "bold")+
   geom_text(aes(x=long, y=lat, label=FIPS_CNTRY), data=CountryLabel, col="black", cex=3.75,fontface = "bold")+
   labs(title = "Mean IAT Scores of \nWhite Participants", fill = "") +
   coord_map(xlim = c(-25, 40),ylim = c(33, 72))
 
-print(MapDraw)
+## Adding theme for the sample size table
+mytheme <- gridExtra::ttheme_default(
+  core = list(fg_params=list(cex = 0.5),padding=unit(c(1, 1), "mm"),bg_params=list(fill=c("honeydew2", "honeydew1"))),
+  colhead = list(fg_params=list(cex = .5,col="white"), bg_params=list(fill="honeydew4")),
+  rowhead = list(fg_params=list(cex = 0.5)))
+## Drawing map along with the table and labels
+ggdraw(MapDraw) + draw_grob(tableGrob(countryfreqtable, rows=NULL,theme = mytheme),x=0.18, y=0.25, width=0.2, height=0.3)+draw_plot_label("*Countries with n<100 (SM,MC.LI,ME,AD,LU) are ignored to pick arbitrary breakpoint", x=0.46, y=0.03, vjust=-0.1, hjust=.8, size = 9, fontface = "italic")
