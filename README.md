@@ -6,6 +6,10 @@ To switch between maps, “EUROPE” draws Europe map and “WORLD” draws worl
 
 ![Alt text](/MeanIATF2.png?raw=true "World Bias")
 
+Another Looks
+
+![Alt text](/EuropeContinuos.png?raw=true "World Bias")
+
 World Implicit Bias Map
 
 ![Alt text](/Rplot.jpeg?raw=true "World Bias")
