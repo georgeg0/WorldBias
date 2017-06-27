@@ -22,11 +22,17 @@
 
 
 library(foreign)
+if(!require(memisc)){install.packages("memisc", repos="http://R-Forge.R-project.org")} 
+library("memisc")
+if(!require(plyr)){install.packages("plyr")} 
+library(plyr)
+library(dplyr)
+
 
 # ---------- Setting Path
 if(TRUE) {
-  setwd("/home/tom/Dropbox/WorldBias") #tom's laptop
-  dataloc='/home/tom/Dropbox/university/expts/WorldBias/data/raw/'
+  setwd("/home/tom/Dropbox/WorldBias") #tom's computer
+  dataloc='/home/tom/Dropbox/university/expts/WorldBias/data/'
 } else { 
   setwd("/george/Desktop/RACIAL-IAT/")
   dataloc='/george/Desktop/RACIAL-IAT/data/raw'
@@ -35,9 +41,8 @@ if(TRUE) {
 # ---------- load raw data
 #dataset1 = read.spss(file.path(dataloc,'Race IAT.public.2015.sav'), to.data.frame=TRUE)
 
-if(!require(memisc)){install.packages("memisc", repos="http://R-Forge.R-project.org")} 
-library("memisc")
-fileNames <- Sys.glob(paste("*.", "sav", sep = ""))
+
+fileNames <- Sys.glob(paste("raw/*.", "sav", sep = ""))
 fileNumbers <- seq(fileNames)
 # Loop for..
 # 1) Iteratively get all the raw statistical file from 'raw' folder 
@@ -67,8 +72,6 @@ for (fileNumber in fileNumbers)
 
 ###### cleaning the file for unwanted entries in countrycit ######
 
-if(!require(plyr)){install.packages("plyr")} 
-library(plyr)
 fileNames <- Sys.glob(paste("*.", "csv", sep = ""))
 fileNumbers <- seq(fileNames)
 
@@ -90,8 +93,7 @@ for (fileNumber in fileNumbers)
 #
 # Seperating 2015 file to new format and old format files ##
 #
-library(dplyr)
-library(plyr)
+
 df <- read.csv(file.path('data/cleansed',"RaceIAT_public_2015.csv"), header=TRUE)
 df2 <- df[grepl(pattern="[[:digit:]]", df$countrycit)|grepl(pattern="[[:digit:]]", df$countryres), ]
 dfdig <- df2[!grepl(pattern="-9", df2$countrycit), ]
