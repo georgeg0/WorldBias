@@ -21,6 +21,7 @@
 # Specify location of these files below, by setting dataloc variable
 
 
+# Libraries we will use
 library(foreign)
 if(!require(memisc)){install.packages("memisc", repos="http://R-Forge.R-project.org")} 
 library("memisc")
@@ -29,20 +30,19 @@ library(plyr)
 library(dplyr)
 
 
-# ---------- Setting Path
+# ---------- Set path for a) where this file is and b) where the data is
 if(TRUE) {
   setwd("/home/tom/Dropbox/WorldBias") #tom's computer
-  dataloc='/home/tom/Dropbox/university/expts/WorldBias/data/'
+  dataloc='/home/tom/Dropbox/university/expts/WorldBias/data' #where a folder called /raw is
 } else { 
   setwd("/george/Desktop/RACIAL-IAT/")
-  dataloc='/george/Desktop/RACIAL-IAT/data/raw'
+  dataloc='/george/Desktop/RACIAL-IAT/data'
 }
 
 # ---------- load raw data
 #dataset1 = read.spss(file.path(dataloc,'Race IAT.public.2015.sav'), to.data.frame=TRUE)
 
-
-fileNames <- Sys.glob(paste("raw/*.", "sav", sep = ""))
+fileNames <- Sys.glob(paste(dataloc,"/raw/*.", "sav", sep = ""))
 fileNumbers <- seq(fileNames)
 # Loop for..
 # 1) Iteratively get all the raw statistical file from 'raw' folder 
@@ -65,14 +65,14 @@ for (fileNumber in fileNumbers)
   } else { 
     df <- dataset1[,c("D_biep.White_Good_all","countrycit","countryres","ethnic")]
   }
-  write.csv(dd, file=file.path('data',csvFileName))
+  write.csv(df, file=file.path(csvFileName))
 }
 
 #race = White:6, ethnicity = White:5
 
 ###### cleaning the file for unwanted entries in countrycit ######
 
-fileNames <- Sys.glob(paste("*.", "csv", sep = ""))
+fileNames <- Sys.glob(paste(dataloc,"/raw/*.", "csv", sep = ""))
 fileNumbers <- seq(fileNames)
 
 for (fileNumber in fileNumbers)
@@ -85,7 +85,7 @@ for (fileNumber in fileNumbers)
   ## removing an unwanted column carried over
   cols.dont.want <- "X"
   df3 <- df22[, ! names(df22) %in% cols.dont.want, drop = F]
-  xx <- sprintf("cleansed/%s",fileNames[fileNumber])
+  xx <- paste(dataloc,"/cleansed/",tail(strsplit(fileNames[fileNumber],"/")[[1]],1),sep="")
   write.csv(df3, xx, row.names=FALSE, quote=FALSE)
 }
 
@@ -94,7 +94,7 @@ for (fileNumber in fileNumbers)
 # Seperating 2015 file to new format and old format files ##
 #
 
-df <- read.csv(file.path('data/cleansed',"RaceIAT_public_2015.csv"), header=TRUE)
+df <- read.csv(file.path(dataloc,'cleansed',"RaceIAT_public_2015.csv"), header=TRUE)
 df2 <- df[grepl(pattern="[[:digit:]]", df$countrycit)|grepl(pattern="[[:digit:]]", df$countryres), ]
 dfdig <- df2[!grepl(pattern="-9", df2$countrycit), ]
 dfalp <- df[grepl(pattern="[[:alpha:]]", df$countrycit) & !grepl(pattern="[[:digit:]]", df$countryres), ]
