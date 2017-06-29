@@ -96,14 +96,14 @@ for (fileNumber in fileNumbers)
 # Seperating 2015 file to new format and old format files ##
 #
 
-df <- read.csv(file.path(dataloc,'cleansed',"RaceIAT public.2015.csv"), header=TRUE)
+df <- read.csv(file.path(dataloc,'cleansed',"Race IAT.public.2015.csv"), header=TRUE)
 df2 <- df[grepl(pattern="[[:digit:]]", df$countrycit)|grepl(pattern="[[:digit:]]", df$countryres), ]
 dfdig <- df2[!grepl(pattern="-9", df2$countrycit), ]
 dfalp <- df[grepl(pattern="[[:alpha:]]", df$countrycit) & !grepl(pattern="[[:digit:]]", df$countryres), ]
-write.csv(dfdig, "RaceIAT_public_2015_digit.csv", row.names=FALSE, quote=FALSE)
-write.csv(dfalp, "RaceIAT_public_2015_alpha.csv", row.names=FALSE, quote=FALSE)
+write.csv(dfdig, file.path(dataloc,"cleansed","RaceIAT_public_2015_digit.csv"), row.names=FALSE, quote=FALSE)
+write.csv(dfalp, file.path(dataloc,"cleansed","RaceIAT_public_2015_alpha.csv"), row.names=FALSE, quote=FALSE)
 #Deleting the old file to replace with the processed file
-fn <- "RaceIAT public.2015.csv"
+fn <- file.path(dataloc,"cleansed","Race IAT.public.2015.csv")
 if (file.exists(fn)) file.remove(fn)
 
 ###### Merging or mapping the files ######
@@ -111,8 +111,8 @@ if (file.exists(fn)) file.remove(fn)
 # Processing the new format files
 #
 datafile2015="RaceIAT_public_2015_digit.csv"
-df1 <- read.csv(file.path('mappers',"Mapper.txt"),header=T,sep="\t")
-df11 <- read.csv(file.path('mappers',"Ethnic.txt"),header=T,sep="\t")
+df1 <- read.csv(file.path('Data',"Mapper.txt"),header=T,sep="\t")
+df11 <- read.csv(file.path('Data',"Ethnic.txt"),header=T,sep="\t")
 dfdig <- read.csv(file.path(dataloc, 'cleansed',datafile2015), header=TRUE)
 (map <- setNames(df1$countrycitcode, df1$countrycit))
 if (file.exists(fn)) file.remove(datafile2015)
@@ -120,12 +120,13 @@ dfdig[c("countrycit", "countryres")] <- lapply(dfdig[c("countrycit", "countryres
 #race = White:6, ethnicity = White:5
 (map1 <- setNames(df11$ethniccode, df11$ethnic))
 dfdig[c("ethnic")] <- lapply(dfdig[c("ethnic")],function(x) map1[as.character(x)])
-if (file.exists(datafile2015)) file.remove(datafile2015)
+fn<-file.path(dataloc,'cleansed',datafile2015)
+if (file.exists(fn)) file.remove(fn)
 
 # Processing the old format files
 datafile2015="RaceIAT_public_2015_alpha.csv"
-df1 <- read.csv(file.path('mappers',"Mapper.txt"),header=T,sep="\t")
-df11 <- read.csv(file.path('mappers',"Ethnic.txt"),header=T,sep="\t")
+df1 <- read.csv(file.path('Data',"Mapper.txt"),header=T,sep="\t")
+df11 <- read.csv(file.path('Data',"Ethnic.txt"),header=T,sep="\t")
 dfalp <- read.csv(file.path(dataloc,'cleansed',datafile2015), header=TRUE)
 (map <- setNames(df1$countrycitcode, df1$countrycit))
 if (file.exists(fn)) file.remove(datafile2015)
@@ -133,20 +134,17 @@ if (file.exists(fn)) file.remove(datafile2015)
 (map1 <- setNames(df11$ethniccode, df11$ethnic))
 dfalp[c("ethnic")] <- lapply(dfalp[c("ethnic")],function(x) map1[as.character(x)])
 df2015 <- rbind(dfdig,dfalp)
-write.csv(df2015,"RaceIAT_public_2015.csv",row.names=FALSE, quote=FALSE)
-if (file.exists(datafile2015)) file.remove(datafile2015)
+write.csv(df2015,file.path(dataloc,"cleansed","RaceIAT_public_2015.csv"),row.names=FALSE, quote=FALSE)
+fn<-file.path(dataloc,'cleansed',datafile2015)
+if (file.exists(fn)) file.remove(fn)
 
 ###### Combining ######
 
 # This code is for merging the csv file
-# Make sure to put all the files in a folder specified in variable dataloc
+# - from this point on we save the data files in the root directory, not the dataloc
 #
-# - assumes files are CSV, but they are in .SAV from the OSF page
-#
-#
-#setwd("/george/Desktop/RACIAL-IAT/data/cleansed")
-files <- list.files(path=dataloc, pattern = "\\.csv$")
-#files <- list.files(pattern = "\\.csv$")
+files <- list.files(path=file.path(dataloc,"cleansed"), pattern = "\\.csv$")
+files <- Sys.glob(paste(dataloc,"/cleansed/*.", "csv", sep = ""))
 DF <-  read.csv(files[1])
 for (f in files[-1]) DF <- rbind(DF, read.csv(f))   
 write.csv(DF, "Race.IAT.2004-2015.csv", row.names=FALSE, quote=FALSE)
@@ -155,24 +153,24 @@ write.csv(DF, "Race.IAT.2004-2015.csv", row.names=FALSE, quote=FALSE)
 #
 # Make more sense, allowing better comparison x-country
 #
-datafile2015="Race.IAT.2004-2015.csv"
-df <- read.csv(file.path('data/cleansed',datafile2015), header=TRUE)
+datafile_all="Race.IAT.2004-2015.csv"
+df <- read.csv(datafile_all, header=TRUE)
 #df2 <- df[grep("White-Not of Hispanic Origin|Black", df$raceomb), ]
 dfwhite <- df[which(df$ethnic == "White-Not of Hispanic Origin"|df$ethnic == "White"), ]
 write.csv(dfwhite, "Race.IAT.2004-2015-white.csv", row.names=FALSE, quote=FALSE)
 
 ###### Filter the Europe Data ######
-datafile2015="Race.IAT.2004-2015-white.csv"
-df <- read.csv(file.path('data/cleansed',datafile2015), header=TRUE)
+datafile="Race.IAT.2004-2015-white.csv"
+df <- read.csv(file.path('data/cleansed',datafile), header=TRUE)
 dfeurope <- df[grep("AL|AD|AT|BY|BE|BA|BG|HR|CZ|DK|EE|FI|FR|DE|GR|HU|IS|IE|IT|LV|LI|LT|LU|MT|MD|MC|ME|MK|AN|NL|NO|PL|PT|RO|RU|SM|RS|SK|SI|ES|SE|CH|UA|UK", df$countrycit), ]
 write.csv(dfeurope, "Race.IAT.2004-2015-white-europe.csv", row.names=FALSE, quote=FALSE)
 
 ###### Finding the stats ######
-df <- read.csv(file.path('data/cleansed',"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
+df <- read.csv("Race.IAT.2004-2015-white-europe.csv", header=TRUE)
 dfstats <- count(df,"countrycit")
 write.csv(dfstats, "Race.IAT.2004-2015-white-europe-stats.csv", row.names=FALSE, quote=FALSE)
 
 ###### Finding aggregate in Europe ######
-gtd <- df <- read.csv(file.path('data/cleansed',"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
+gtd <- df <- read.csv("Race.IAT.2004-2015-white-europe.csv", header=TRUE)
 dfagg <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
 write.csv(dfagg, "Race.IAT.2004-2015-white-europe-aggregate.csv", row.names=FALSE, quote=FALSE)
