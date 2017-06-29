@@ -46,10 +46,11 @@ fileNames <- Sys.glob(paste(dataloc,"/raw/*.", "sav", sep = ""))
 fileNumbers <- seq(fileNames)
 # Loop for..
 # 1) Iteratively get all the raw statistical file from 'raw' folder 
-# 2) Generate csv file and put under 'data' folder for further processing
+# 2) Generate csv file and put under 'cleansed' folder for further processing
 for (fileNumber in fileNumbers)
 {
-  csvFileName <-  paste(sub(paste("\\.", "sav", sep = ""), "", fileNames[fileNumber]),".", "csv", sep = "")
+  shortFileName <- tail(strsplit(fileNames[fileNumber],"/")[[1]],1)
+  csvFileName <-  paste(dataloc, "/cleansed/",sub(paste("\\.", "sav", sep = ""), "", shortFileName),".", "csv", sep = "")
   dataset1 = read.spss(fileNames[fileNumber], to.data.frame=TRUE)
   #This way of loading sav doesnt work in my machine, so commenting out for testing
   #dataset1 <- data.frame(as.data.set(spss.system.file(file.path(dataloc,fileNames[fileNumber]))))
@@ -70,9 +71,9 @@ for (fileNumber in fileNumbers)
 
 #race = White:6, ethnicity = White:5
 
-###### cleaning the file for unwanted entries in countrycit ######
+###### cleaning the csv files for unwanted entries in countrycit ######
 
-fileNames <- Sys.glob(paste(dataloc,"/raw/*.", "csv", sep = ""))
+fileNames <- Sys.glob(paste(dataloc,"/cleansed/*.", "csv", sep = ""))
 fileNumbers <- seq(fileNames)
 
 for (fileNumber in fileNumbers)
@@ -85,7 +86,8 @@ for (fileNumber in fileNumbers)
   ## removing an unwanted column carried over
   cols.dont.want <- "X"
   df3 <- df22[, ! names(df22) %in% cols.dont.want, drop = F]
-  xx <- paste(dataloc,"/cleansed/",tail(strsplit(fileNames[fileNumber],"/")[[1]],1),sep="")
+  xx<-fileNames[fileNumber]
+  #xx <- paste(dataloc,"/cleansed/",tail(strsplit(fileNames[fileNumber],"/")[[1]],1),sep="")
   write.csv(df3, xx, row.names=FALSE, quote=FALSE)
 }
 
@@ -94,14 +96,14 @@ for (fileNumber in fileNumbers)
 # Seperating 2015 file to new format and old format files ##
 #
 
-df <- read.csv(file.path(dataloc,'cleansed',"RaceIAT_public_2015.csv"), header=TRUE)
+df <- read.csv(file.path(dataloc,'cleansed',"RaceIAT public.2015.csv"), header=TRUE)
 df2 <- df[grepl(pattern="[[:digit:]]", df$countrycit)|grepl(pattern="[[:digit:]]", df$countryres), ]
 dfdig <- df2[!grepl(pattern="-9", df2$countrycit), ]
 dfalp <- df[grepl(pattern="[[:alpha:]]", df$countrycit) & !grepl(pattern="[[:digit:]]", df$countryres), ]
 write.csv(dfdig, "RaceIAT_public_2015_digit.csv", row.names=FALSE, quote=FALSE)
 write.csv(dfalp, "RaceIAT_public_2015_alpha.csv", row.names=FALSE, quote=FALSE)
 #Deleting the old file to replace with the processed file
-fn <- "RaceIAT_public_2015.csv"
+fn <- "RaceIAT public.2015.csv"
 if (file.exists(fn)) file.remove(fn)
 
 ###### Merging or mapping the files ######
@@ -111,7 +113,7 @@ if (file.exists(fn)) file.remove(fn)
 datafile2015="RaceIAT_public_2015_digit.csv"
 df1 <- read.csv(file.path('mappers',"Mapper.txt"),header=T,sep="\t")
 df11 <- read.csv(file.path('mappers',"Ethnic.txt"),header=T,sep="\t")
-dfdig <- read.csv(file.path('data/cleansed',datafile2015), header=TRUE)
+dfdig <- read.csv(file.path(dataloc, 'cleansed',datafile2015), header=TRUE)
 (map <- setNames(df1$countrycitcode, df1$countrycit))
 if (file.exists(fn)) file.remove(datafile2015)
 dfdig[c("countrycit", "countryres")] <- lapply(dfdig[c("countrycit", "countryres")],function(x) map[as.character(x)])
@@ -124,7 +126,7 @@ if (file.exists(datafile2015)) file.remove(datafile2015)
 datafile2015="RaceIAT_public_2015_alpha.csv"
 df1 <- read.csv(file.path('mappers',"Mapper.txt"),header=T,sep="\t")
 df11 <- read.csv(file.path('mappers',"Ethnic.txt"),header=T,sep="\t")
-dfalp <- read.csv(file.path('data/cleansed',datafile2015), header=TRUE)
+dfalp <- read.csv(file.path(dataloc,'cleansed',datafile2015), header=TRUE)
 (map <- setNames(df1$countrycitcode, df1$countrycit))
 if (file.exists(fn)) file.remove(datafile2015)
 #race = White:6, ethnicity = White:5
