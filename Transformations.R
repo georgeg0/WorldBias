@@ -141,36 +141,37 @@ if (file.exists(fn)) file.remove(fn)
 ###### Combining ######
 
 # This code is for merging the csv file
-# - from this point on we save the data files in the root directory, not the dataloc
 #
-files <- list.files(path=file.path(dataloc,"cleansed"), pattern = "\\.csv$")
+#files <- list.files(path=file.path(dataloc,"cleansed"), pattern = "\\.csv$")
 files <- Sys.glob(paste(dataloc,"/cleansed/*.", "csv", sep = ""))
 DF <-  read.csv(files[1])
 for (f in files[-1]) DF <- rbind(DF, read.csv(f))   
-write.csv(DF, "Race.IAT.2004-2015.csv", row.names=FALSE, quote=FALSE)
+write.csv(DF, file.path(dataloc,"Race.IAT.2004-2015.csv"), row.names=FALSE, quote=FALSE)
+
+
 
 ###### filter the data by white respondants only ######
 #
 # Make more sense, allowing better comparison x-country
 #
-datafile_all="Race.IAT.2004-2015.csv"
-df <- read.csv(datafile_all, header=TRUE)
+datafile="Race.IAT.2004-2015.csv"
+df <- read.csv(file.path(dataloc,datafile), header=TRUE)
 #df2 <- df[grep("White-Not of Hispanic Origin|Black", df$raceomb), ]
 dfwhite <- df[which(df$ethnic == "White-Not of Hispanic Origin"|df$ethnic == "White"), ]
-write.csv(dfwhite, "Race.IAT.2004-2015-white.csv", row.names=FALSE, quote=FALSE)
+write.csv(dfwhite, file.path(dataloc,"Race.IAT.2004-2015-white.csv"), row.names=FALSE, quote=FALSE)
 
 ###### Filter the Europe Data ######
 datafile="Race.IAT.2004-2015-white.csv"
-df <- read.csv(file.path('data/cleansed',datafile), header=TRUE)
+df <- read.csv(file.path(dataloc,datafile), header=TRUE)
 dfeurope <- df[grep("AL|AD|AT|BY|BE|BA|BG|HR|CZ|DK|EE|FI|FR|DE|GR|HU|IS|IE|IT|LV|LI|LT|LU|MT|MD|MC|ME|MK|AN|NL|NO|PL|PT|RO|RU|SM|RS|SK|SI|ES|SE|CH|UA|UK", df$countrycit), ]
-write.csv(dfeurope, "Race.IAT.2004-2015-white-europe.csv", row.names=FALSE, quote=FALSE)
+write.csv(dfeurope, file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), row.names=FALSE, quote=FALSE)
 
 ###### Finding the stats ######
-df <- read.csv("Race.IAT.2004-2015-white-europe.csv", header=TRUE)
+df <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
 dfstats <- count(df,"countrycit")
-write.csv(dfstats, "Race.IAT.2004-2015-white-europe-stats.csv", row.names=FALSE, quote=FALSE)
+write.csv(dfstats, file.path(dataloc,"Race.IAT.2004-2015-white-europe-stats.csv"), row.names=FALSE, quote=FALSE)
 
 ###### Finding aggregate in Europe ######
-gtd <- df <- read.csv("Race.IAT.2004-2015-white-europe.csv", header=TRUE)
+gtd <- df <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
 dfagg <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
-write.csv(dfagg, "Race.IAT.2004-2015-white-europe-aggregate.csv", row.names=FALSE, quote=FALSE)
+write.csv(dfagg, file.path(dataloc,"Race.IAT.2004-2015-white-europe-aggregate.csv"), row.names=FALSE, quote=FALSE)
