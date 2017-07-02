@@ -8,6 +8,11 @@ library(ggplot2)
 library(foreign)
 library(plyr)
 library(raster)
+library(maps)
+library(mapdata)
+library(modify)
+library(gridExtra)
+library(cowplot)
 
 #Give which map to draw WORLD or EUROPE map
 whichmap = "EUROPE"
@@ -20,11 +25,31 @@ if(whichmap == "EUROPE") {
   # ---------- get data
   #Reading the consolidated CSV file
   gtd <- read.csv("Race.IAT.2004-2015-white-europe.csv")
-  world      <- readOGR(dsn=path.expand("/Users/ggittu/Downloads/europenew"),layer="Europe")
   
-  # Reevaluating country codes to match the country code in IAT file
-  world@data$ORGN_NAME <- as.character (revalue(world@data$ORGN_NAME, replace=c("Shqipëria"="AL","Andorra"="AD","Österreich"="AT","België / Belgique"="BE","Bosna i Hercegovina"="BA","Hrvatska"="HR","Cesko"="CZ","Danmark"="DK","Eesti"="EE","Suomi"="FI","France"="FR","Deutschland"="DE","Elláda"="GR","Magyarország"="HU","Éire / Ireland"="IE","Italia"="IT","Latvija"="LV","Liechtenstein"="LI","Lietuva"="LT","Lëtzebuerg / Luxemburg / Luxembourg"="LU","Makedonija"="MK","Malta"="MT","Monaco"="MN","Crna Gora"="ME","Nederland"="NL","Norge"="NO","Polska"="PL","Portugal"="PT","San Marino"="SM","Srbija"="RS","Slovensko"="SK","Slovenija"="SI","España"="ES","Sverige"="SE","Schweiz / Suisse / Svizerra / Svizra"="CH","United Kingdom"="UK","Belarus"="BY","Balgarija"="BG","Ísland"="IS","Moldova"="MD","România"="RO","Ukrajina"="UA","Rossíya"="RU")))
-  colnames(world@data)[which(names(world@data) == "ORGN_NAME")] <- "FIPS_CNTRY"
+  # Creating a list of European countries
+  eu <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", 
+          "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", 
+          "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", 
+          "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", 
+          "Slovenia", "Spain", "Sweden", "UK","Albania","Armenia","Azerbaijan","Belarus","Bosnia and Herzegovina",
+          "Georgia","Iceland","Kazakhstan","Kosovo","Macedonia","Moldova",
+          "Norway","Serbia","Switzerland","Turkey","Ukraine")
+  
+  # creating a Europe map from the world map
+  europe <- map_data('world', region=eu)
+  
+  # Reevaluating country name to FIPS code to match the country code in IAT file
+  # Taking out these countries as n < 100
+  #"San Marino"="SM","Monaco"="MC","Liechtenstein"="LI","Montenegro"="ME","Andorra"="AD","Luxembourg"="LU", AN is netherlands Antilles
+  europe$region <- as.character (revalue(europe$region, replace=c("Austria"="AT", "Belgium"="BE", "Bulgaria"="BG", "Croatia"="HR", "Cyprus"="CY", "Czech Republic"="CZ", 
+                                                                  "Denmark"="DK", "Estonia"="EE", "Finland"="FI", "France"="FR", "Germany"="DE", "Greece"="GR", 
+                                                                  "Hungary"="HU", "Ireland"="IE", "Italy"="IT", "Latvia"="LV", "Lithuania"="LT", 
+                                                                  "Malta"="MT", "Netherlands"="NL", "Poland"="PL", "Portugal"="PT", "Romania"="RO", "Slovakia"="SK", 
+                                                                  "Slovenia"="SI", "Spain"="ES", "Sweden"="SE",
+                                                                  "Albania"="AL","Armenia"="AM","Azerbaijan"="AZ","Belarus"="BY","Bosnia and Herzegovina"="BA",
+                                                                  "Georgia"="GE","Iceland"="IS","Kazakhstan"="KZ","Macedonia"="MK","Moldova"="MD",
+                                                                  "Norway"="NO","Serbia"="RS","Switzerland"="CH","Turkey"="TR","Ukraine"="UA"))) 
+  colnames(europe)[which(names(europe) == "region")] <- "FIPS_CNTRY"
 } else { 
   # ---------- Setting Path
   setwd("/george/Desktop/RACIAL-IAT/data/cleansedtest")
@@ -41,19 +66,60 @@ if(whichmap == "EUROPE") {
 
 # ---------- data munging
 gtd.recent <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
+# Renaming for merging
+colnames(gtd.recent)[which(names(gtd.recent) == "countrycit")] <- "FIPS_CNTRY"
 
 # --------- draw map
-ggplot() +  geom_polygon(data=world, aes(x=long, y=lat, group=group))
-countries <- world@data
-countries <- cbind(id=rownames(countries),countries)
-countries <- merge(countries,gtd.recent, 
-                   by.x="FIPS_CNTRY", by.y="countrycit", all.x=T)
-map.df <- fortify(world)
-map.df <- merge(map.df,countries, by="id")
-MapDraw <- ggplot(data = map.df, aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all))+
-  geom_polygon()  +
-  coord_equal() +
-  theme(axis.title = element_blank(), axis.text = element_blank()) + scale_fill_gradient(high = "springgreen4", low= "grey90",limits = c(.29, .45))+
-  labs(title = Maptitle, fill = "IAT Score")
+ggplot() +  geom_polygon(data=europe, aes(x=long, y=lat, group=group))
+map.df = merge(europe, gtd.recent, by = "FIPS_CNTRY")
+map.df = map.df[order(map.df$order),]
 
-print(MapDraw)
+# ---------- Creating and centering labels
+CountryLabel <- ddply(map.df,"FIPS_CNTRY", summarise, long = mean(long), lat = mean(lat))
+CountryLabelIat <- merge(CountryLabel,gtd.recent)
+
+# ---------- Minor adjustment of labels that dint align to centre
+#library(devtools)
+#install_github(repo = "modify", username = "skranz") ## Making using of a custom repo make sure to have devtools
+# 
+modify(CountryLabel,FIPS_CNTRY=="SE", long=long-2)
+modify(CountryLabelIat,FIPS_CNTRY=="SE", long=long-2)
+modify(CountryLabel,FIPS_CNTRY=="FI", long=long+2)
+modify(CountryLabelIat,FIPS_CNTRY=="FI", long=long+2)
+modify(CountryLabel,FIPS_CNTRY=="EE", long=long+1.5)
+modify(CountryLabelIat,FIPS_CNTRY=="EE", long=long+1.5)
+modify(CountryLabel,FIPS_CNTRY=="IT", long=long+2)
+modify(CountryLabelIat,FIPS_CNTRY=="IT", long=long+2)
+modify(CountryLabel,FIPS_CNTRY=="GR", long=long-2)
+modify(CountryLabelIat,FIPS_CNTRY=="GR", long=long-2)
+modify(CountryLabel,FIPS_CNTRY=="HR", lat=lat+1)
+modify(CountryLabelIat,FIPS_CNTRY=="HR", lat=lat+1)
+modify(CountryLabel,FIPS_CNTRY=="NO", lat=lat-8)
+modify(CountryLabelIat,FIPS_CNTRY=="NO", lat=lat-8)
+modify(CountryLabel,FIPS_CNTRY=="NO", long=long-6)
+modify(CountryLabelIat,FIPS_CNTRY=="NO", long=long-6)
+modify(CountryLabel,FIPS_CNTRY=="IS", long=long+1.5)
+modify(CountryLabelIat,FIPS_CNTRY=="IS", long=long+1.5)
+
+constat <- read.csv("Consolidatedstat.2004-2015-white-europe.csv")
+constat <- constat[-c(42,27,23,3,29,1,25), ]
+countryfreqtable <- cbind(constat[,c(1,4)])
+colnames(countryfreqtable) <- c("Country", "n")
+
+MapDraw <- ggplot(data = map.df)+ 
+  geom_polygon(aes(x=long, y=lat, group = group, fill = D_biep.White_Good_all),color = "gray30",size=.05) +
+  coord_equal() +
+  theme(axis.title = element_blank(),plot.title=element_text(vjust=-40,hjust=.1,size=25,face="bold"), axis.text = element_blank(),legend.position=c(.5, 1),legend.direction="horizontal",panel.background = element_rect(fill = 'honeydew'))+guides(fill = guide_colorbar(barwidth=47.5,barheight = .8)) +
+  scale_fill_gradientn(colours=c("steelblue4","steelblue3","steelblue1","snow3","firebrick1","firebrick3","firebrick4"), limits = c(.29, .45),breaks= c(.29, .37,.45))+
+  geom_text(aes(x=long, y=lat-.5, label=round(D_biep.White_Good_all,digits = 3)), data=CountryLabelIat, col="black", cex=2.75,fontface = "bold")+
+  geom_text(aes(x=long, y=lat, label=FIPS_CNTRY), data=CountryLabel, col="black", cex=3.75,fontface = "bold")+
+  labs(title = "Mean IAT Scores of \nWhite Participants", fill = "") +
+  coord_map(xlim = c(-25, 40),ylim = c(33, 72))
+
+## Adding theme for the sample size table
+mytheme <- gridExtra::ttheme_default(
+  core = list(fg_params=list(cex = 0.5),padding=unit(c(1, 1), "mm"),bg_params=list(fill=c("honeydew2", "honeydew1"))),
+  colhead = list(fg_params=list(cex = .5,col="white"), bg_params=list(fill="honeydew4")),
+  rowhead = list(fg_params=list(cex = 0.5)))
+## Drawing map along with the table and labels
+ggdraw(MapDraw) + draw_grob(tableGrob(countryfreqtable, rows=NULL,theme = mytheme),x=0.18, y=0.25, width=0.2, height=0.3)+draw_plot_label("*Countries with n<100 (SM,MC.LI,ME,AD,LU) are ignored to pick arbitrary breakpoint", x=0.46, y=0.03, vjust=-0.1, hjust=.8, size = 9, fontface = "italic")

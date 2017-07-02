@@ -4,14 +4,15 @@ spss file need to be downloaded from https://osf.io/52qxl/ for each individual y
 
 To switch between maps, “EUROPE” draws Europe map and “WORLD” draws world map. These change need to be added to WorldBias.R
 
-![Alt text](/EuropeV2.png?raw=true "World Bias")
+![Alt text](/MeanIATF2.png?raw=true "World Bias")
+
+Another Looks
+
+![Alt text](/EuropeContinuos.png?raw=true "World Bias")
 
 World Implicit Bias Map
 
 ![Alt text](/Rplot.jpeg?raw=true "World Bias")
-
-![Alt text](/Europev1.png?raw=true "World Bias")
-
 
 
 
