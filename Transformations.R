@@ -170,7 +170,7 @@ dfstats <- count(df,countrycit)
 #write.csv(dfstats, file.path(dataloc,"Race.IAT.2004-2015-white-europe-stats.csv"), row.names=FALSE, quote=FALSE)
 
 ###### Finding aggregate in Europe ######
-gtd <- df <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
+gtd <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
 #dfagg <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
 #write.csv(dfagg, file.path(dataloc,"Race.IAT.2004-2015-white-europe-aggregate.csv"), row.names=FALSE, quote=FALSE)
 
@@ -184,8 +184,8 @@ constat <- join(ag, dfstats,
 # Calculate the standard error field
 constat$err <- constat$D_biep.White_Good_all[,c("sd")]/sqrt(constat$n)
 
-# TAking out countries with n< 100
-constat <- constat[-c(42,27,23,3,29,1,25), ] #hardcoding exceptions is terrible practice!
-
+# Taking out countries with n< 100
+#constat <- constat[-c(42,27,23,3,29,1,25), ] #hardcoding exceptions is terrible practice!
+constat <- constat[!(constat$n<100),]
 # Write the consolidated file with Mean IAT score, country code, SD, SE and sample size (Good file to get Idea of data points)
 write.csv(constat, file.path(dataloc,"Consolidatedstat.2004-2015-white-europe.csv"), row.names=FALSE, quote=FALSE)
