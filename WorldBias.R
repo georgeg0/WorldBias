@@ -111,9 +111,7 @@ modify(CountryLabelIat,FIPS_CNTRY=="NO", long=long-6)
 modify(CountryLabel,FIPS_CNTRY=="IS", long=long+1.5)
 modify(CountryLabelIat,FIPS_CNTRY=="IS", long=long+1.5)
 
-#TK
-constat <- read.csv("Consolidatedstat.2004-2015-white-europe.csv")
-constat <- constat[-c(42,27,23,3,29,1,25), ]
+constat <- read.csv(file.path(dataloc,"Consolidatedstat.2004-2015-white-europe.csv"))
 countryfreqtable <- cbind(constat[,c(1,4)])
 colnames(countryfreqtable) <- c("Country", "n")
 

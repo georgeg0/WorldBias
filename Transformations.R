@@ -23,9 +23,7 @@
 
 # Libraries we will use
 library(foreign)
-if(!require(memisc)){install.packages("memisc", repos="http://R-Forge.R-project.org")} 
-library("memisc")
-if(!require(plyr)){install.packages("plyr")} 
+library(memisc)
 library(plyr)
 library(dplyr)
 
@@ -168,10 +166,26 @@ write.csv(dfeurope, file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), ro
 
 ###### Finding the stats ######
 df <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
-dfstats <- count(df,"countrycit")
-write.csv(dfstats, file.path(dataloc,"Race.IAT.2004-2015-white-europe-stats.csv"), row.names=FALSE, quote=FALSE)
+dfstats <- count(df,countrycit)
+#write.csv(dfstats, file.path(dataloc,"Race.IAT.2004-2015-white-europe-stats.csv"), row.names=FALSE, quote=FALSE)
 
 ###### Finding aggregate in Europe ######
 gtd <- df <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"), header=TRUE)
-dfagg <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
-write.csv(dfagg, file.path(dataloc,"Race.IAT.2004-2015-white-europe-aggregate.csv"), row.names=FALSE, quote=FALSE)
+#dfagg <- aggregate(D_biep.White_Good_all~countrycit,gtd,mean)
+#write.csv(dfagg, file.path(dataloc,"Race.IAT.2004-2015-white-europe-aggregate.csv"), row.names=FALSE, quote=FALSE)
+
+# Create a DF with mean IAT and SD for respective country
+ag <- aggregate(D_biep.White_Good_all~countrycit, gtd, function(x) c(mean = mean(x), sd = sd(x)))
+
+# Join the stats df and ag df
+constat <- join(ag, dfstats,
+                type = "inner")
+
+# Calculate the standard error field
+constat$err <- constat$D_biep.White_Good_all[,c("sd")]/sqrt(constat$n)
+
+# TAking out countries with n< 100
+constat <- constat[-c(42,27,23,3,29,1,25), ] #hardcoding exceptions is terrible practice!
+
+# Write the consolidated file with Mean IAT score, country code, SD, SE and sample size (Good file to get Idea of data points)
+write.csv(constat, file.path(dataloc,"Consolidatedstat.2004-2015-white-europe.csv"), row.names=FALSE, quote=FALSE)
