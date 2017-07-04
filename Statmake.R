@@ -5,32 +5,25 @@
 ######
 library(plyr)
 
-# Read the stat file of european countries  (sample size)
-df2 <- read.csv("/george/Desktop/RACIAL-IAT/data/cleansedtest/Race.IAT.2004-2015-white-europe-stats.csv")
-setwd("/george/Desktop/RACIAL-IAT/data/cleansedtest")
 
-#Reading the consolidated CSV file for Europe
-gtd <- read.csv("Race.IAT.2004-2015-white-europe.csv")
 
-# Create a DF with mean IAT and SD for respective country
-ag <- aggregate(D_biep.White_Good_all~countrycit, gtd, function(x) c(mean = mean(x), sd = sd(x)))
+# ---------- Set path for a) where this file is and b) where the data is
+if(TRUE) {
+  setwd("/home/tom/Dropbox/WorldBias") #tom's computer
+  dataloc='/home/tom/Dropbox/university/expts/WorldBias/data' #where a folder called /raw is
+} else { 
+  setwd("/george/Desktop/RACIAL-IAT/")
+  dataloc='/george/Desktop/RACIAL-IAT/data/cleansedtest/'
+}
 
-# Join the stats df and ag df
-constat <- join(ag, df2,
-                type = "inner")
-
-# Calculate the standard error field
-constat$err <- constat$D_biep.White_Good_all[,c("sd")]/sqrt(constat$freq)
-
-# Write the consolidated file with Mean IAT score, country code, SD, SE and sample size (Good file to get Idea of data points)
-#write.csv(constat, "Consolidatedstat.2004-2015-white-europe.csv", row.names=FALSE, quote=FALSE)
-# TAking out countries with n< 100
-constat <- constat[-c(42,27,23,3,29,1,25), ]
+#Reading the consolidated stats CSV file for Europe
+constat <- read.csv(file.path(dataloc,"Consolidatedstat.2004-2015-white-europe.csv"))
 
 IATScore = constat$D_biep.White_Good_all[,c("mean")]
-freq = constat$freq
+freq = constat$n
 serr = constat$err
 
+#This doesn't work
 plot(freq, IATScore,
      ylim=range(c(IATScore-serr, IATScore+serr)),
      pch=19, xlab="Sample Size", ylab="Mean IAT Score",

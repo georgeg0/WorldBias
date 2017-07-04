@@ -10,22 +10,35 @@ library(plyr)
 library(raster)
 library(maps)
 library(mapdata)
-library(modify)
 library(gridExtra)
 library(cowplot)
+library(devtools)
+#install_github(repo = "modify", username = "skranz") ## Making using of a custom repo make sure to have devtools
+#install_github(repo = "skranz/modify",force=TRUE)
+library(modify)
+
+ 
+# set path for where data is
+
+if(TRUE) {
+  setwd("/home/tom/Dropbox/WorldBias") #tom's computer
+  dataloc='/home/tom/Dropbox/university/expts/WorldBias/data' #where a folder called /raw is
+} else { 
+  setwd("/george/Desktop/RACIAL-IAT/")
+  dataloc='/george/Desktop/RACIAL-IAT/data/cleansedtest'
+}
+
 
 #Give which map to draw WORLD or EUROPE map
 whichmap = "EUROPE"
 
 if(whichmap == "EUROPE") {
   # ---------- Setting Path
-  setwd("/george/Desktop/RACIAL-IAT/data/cleansedtest")
   Maptitle = "Implicit Bias Europe"
   
   # ---------- get data
   #Reading the consolidated CSV file
-  gtd <- read.csv("Race.IAT.2004-2015-white-europe.csv")
-  
+  gtd <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white-europe.csv"))
   # Creating a list of European countries
   eu <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", 
           "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", 
@@ -52,13 +65,12 @@ if(whichmap == "EUROPE") {
   colnames(europe)[which(names(europe) == "region")] <- "FIPS_CNTRY"
 } else { 
   # ---------- Setting Path
-  setwd("/george/Desktop/RACIAL-IAT/data/cleansedtest")
   Maptitle = "Implicit Bias World"
   
   # ---------- get data
   #Reading the consolidated CSV file
-  gtd <- read.csv("Race.IAT.2004-2015-white.csv")
-  world      <- readOGR(dsn=path.expand("/Users/ggittu/Documents/WorldBias/WorldMapShapes"),layer="world_country_admin_boundary_shapefile_with_fips_codes")
+  gtd <- read.csv(file.path(dataloc,"Race.IAT.2004-2015-white.csv"))
+  world      <- readOGR(dsn=path.expand("WorldMapShapes"),layer="world_country_admin_boundary_shapefile_with_fips_codes")
   
   # Reevaluating country codes to match the country code in IAT file
   world@data$FIPS_CNTRY <- as.character (revalue(world@data$FIPS_CNTRY, replace=c(AA="AW",AC="AG",AG="DZ",AJ="AZ",AN="AD",AQ="AS",AS="AU",AU="AT",AV="AI",AY="AQ",BA="BH",BC="BW",BD="BM",BF="BS",BG="BD",BH="BZ",BK="BA",BL="BO",BN="BJ",BO="BY",BP="SB",BU="BG",BX="BN",BY="BI",CB="KH",CD="TD",CE="LK",CF="CG",CG="CD",CH="CN",CI="CL",CJ="KY",CK="CC",CN="KM",CQ="MP",CS="CR",CT="CF",CW="CK",DO="DM",DR="DO",DA="DK",EI="IE",EK="GQ",EN="EE",ES="SV",EZ="CZ",FG="GF",FP="PF",FQ="XXX",FS="TF",GA="GM",GB="GA",GG="GE",GJ="GD",GK="XX",GM="DE",GO="XX",GQ="GU",GV="GN",GZ="XX",HA="HT",HO="HN",HQ="XX",IC="IS",IM="XX",IS="XX",IV="CI",IZ="IQ",JA="JP",JE="XX",JN="XX",JQ="XX",JU="XX",KN="KP",KR="KI",KS="KR",KT="CX",KU="KW",LE="LB",LG="LV",LH="LT",LI="LR",LO="SK",LS="LI",LT="LS",MA="MG",MB="MQ",MF="YT",MG="MN",MH="MS",MI="MW",MN="MC",MO="MA",MP="MU",MQ="XX",MU="OM",MW="XXX",NE="NU",NG="NE",NH="VU",NI="NG",NL="NL",NS="SR",NT="XXX",NU="NI",PA="PY",PC="PN",PF="XX",PG="XX",PM="PA",PO="PT",PP="PG",PS="PW",PU="GW",RM="MH",RP="PH",RQ="PR",RS="RU",SB="PM",SC="KN",SE="SC",SF="ZA",SG="SN",SN="SG",SP="ES",SR="XXX",ST="LC",SU="SD",SV="SJ",SW="SE",SX="GS",SZ="CH",TD="TT",TI="TJ",TK="TC",TL="TK",TM="XXX",TN="TO",TO="TG",TP="ST",TS="TN",TU="TR",TX="TM",UV="BF",VI="VG",VM="VN",VQ="VI",VT="VA",WA="NA",WE="XX",WI="XX",WQ="XX",WZ="SZ",YM="YE",ZA="ZM",ZI="ZW",UP="UA")))
@@ -79,9 +91,7 @@ CountryLabel <- ddply(map.df,"FIPS_CNTRY", summarise, long = mean(long), lat = m
 CountryLabelIat <- merge(CountryLabel,gtd.recent)
 
 # ---------- Minor adjustment of labels that dint align to centre
-#library(devtools)
-#install_github(repo = "modify", username = "skranz") ## Making using of a custom repo make sure to have devtools
-# 
+
 modify(CountryLabel,FIPS_CNTRY=="SE", long=long-2)
 modify(CountryLabelIat,FIPS_CNTRY=="SE", long=long-2)
 modify(CountryLabel,FIPS_CNTRY=="FI", long=long+2)
@@ -101,8 +111,7 @@ modify(CountryLabelIat,FIPS_CNTRY=="NO", long=long-6)
 modify(CountryLabel,FIPS_CNTRY=="IS", long=long+1.5)
 modify(CountryLabelIat,FIPS_CNTRY=="IS", long=long+1.5)
 
-constat <- read.csv("Consolidatedstat.2004-2015-white-europe.csv")
-constat <- constat[-c(42,27,23,3,29,1,25), ]
+constat <- read.csv(file.path(dataloc,"Consolidatedstat.2004-2015-white-europe.csv"))
 countryfreqtable <- cbind(constat[,c(1,4)])
 colnames(countryfreqtable) <- c("Country", "n")
 
@@ -123,3 +132,6 @@ mytheme <- gridExtra::ttheme_default(
   rowhead = list(fg_params=list(cex = 0.5)))
 ## Drawing map along with the table and labels
 ggdraw(MapDraw) + draw_grob(tableGrob(countryfreqtable, rows=NULL,theme = mytheme),x=0.18, y=0.25, width=0.2, height=0.3)+draw_plot_label("*Countries with n<100 (SM,MC.LI,ME,AD,LU) are ignored to pick arbitrary breakpoint", x=0.46, y=0.03, vjust=-0.1, hjust=.8, size = 9, fontface = "italic")
+
+ggsave(filename=paste(whichmap,".png",sep=""), plot=MapDraw)
+
