@@ -4,13 +4,13 @@ Following the publication of our [map](https://theconversation.com/this-map-show
 
 The main result from analysing the data of white Europeans was that - across every country - their implicit associations with blackness are negative (on average, they find it easier to associate white faces with positives words, and easier to association black faces with negative words). To see this, you can look at our version of the map which de-emphasises differences between countries and instead highlights the distance of the average scores from zero. White is neutral associations, red is positive associations about blackness and green is negative implicit associations about blackness:
 
-![ ](/home/tom/Dropbox/WorldBias/EuropeContinuos.png  "Europe map  - average race IAT for white europeans")
+![ ](EuropeContinuos.png  "Europe map  - average race IAT for white europeans")
 
 There is no red or white.
 
 Taking this same data, you can order the countries by smallest to largest, and plot each point to give a pleasing slope
 
-![ ](/home/tom/Dropbox/WorldBias/IAT_by_ethnicity_whiteonly.png  "ranking order plot of average IAT for white europeans")
+![ ](IAT_by_ethnicity_whiteonly.png  "ranking order plot of average IAT for white europeans")
 
 Note
 1. You can see clearly that the IAT scores are consistently above zero (zero represents neutral - neither positive nor negative average associations - and is shown on the graph with a horizontal line).
@@ -18,7 +18,7 @@ Note
 
 First I looked at participants in the online IAT who identified as black, but the numbers were really low, often in single digits for some countries (just 632 in total, across all European countries, compared to 110,641 who identified as white). So, as an alternative, I also calculated the mean IAT for all participants who didn't identify as white (20,847 in all). Here's the result
 
-![ ](/home/tom/Dropbox/WorldBias/IAT_by_ethnicity.png  "average IAT by country and ethnicity")
+![ ](IAT_by_ethnicity.png  "average IAT by country and ethnicity")
 
 I haven't plotted the confidence estimates around the mean values, since a) they would ruin the plot because they are so large and b) the individual values are interesting, but I think the overall pattern might be. (If you're the kind of person that likes to know error estimates then the data is [here](https://github.com/tomstafford/WorldBias/tree/master/Data)).
 
@@ -27,4 +27,25 @@ So, what can we see?
 * Implicit associations for whites look like they are stronger than for non-whites
 * Average score for black participants are <0 in some countries, but that may just be because sample numbers are low enough (ie it is noise, not signal).
 
-For completeness, let's plot the normalised distributions of scores, for those three ethniticy categorised, aggegrating across countries.
+For completeness, let's plot the normalised distributions of scores, for those three ethniticy categorised, aggegrating across countries:
+
+![ ](hist_by_ethnicity.png  "Score distributions by ethnicity")
+
+Which fits with the US result, in that it puts the average IAT for black europeans centered almosts exactly on zero (neither positive nor negative associations, see Axt et al, 2014; Nosek et al, 2002).
+
+## Links
+
+Read about our original map: 
+This map shows what white Europeans associate with race – and it makes for uncomfortable reading
+(https://theconversation.com/this-map-shows-what-white-europeans-associate-with-race-and-it-makes-for-uncomfortable-reading-76661)
+
+More detail, other maps and further reading on the [figshare site](https://figshare.com/articles/European_map_of_Implicit_Racial_Bias/4750588)
+
+Original analysis code and raw data is on [github](https://github.com/georgeg0/WorldBias). Code for this post here on my [fork](https://github.com/tomstafford/WorldBias) of George's repo
+
+
+## References
+
+Axt, J. R., Ebersole, C. R., & Nosek, B. A. (2014). The rules of implicit evaluation by race, religion, and age. Psychological Science, 25(9), 1804-1815.http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.1010.98&rep=rep1&type=pdf
+
+Nosek, B. A., Banaji, M., & Greenwald, A. G. (2002). Harvesting implicit group attitudes and beliefs from a demonstration web site. Group Dynamics: Theory, Research, and Practice, 6(1), 101.http://www.cos.gatech.edu/facultyres/Diversity_Studies/Nosek_HarvestingImplicit.pdf

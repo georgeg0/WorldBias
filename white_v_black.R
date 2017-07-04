@@ -23,6 +23,13 @@ dfeurope_w <- dfwhite[grep("AL|AD|AT|BY|BE|BA|BG|HR|CZ|DK|EE|FI|FR|DE|GR|HU|IS|I
 dfeurope_b <- dfblack[grep("AL|AD|AT|BY|BE|BA|BG|HR|CZ|DK|EE|FI|FR|DE|GR|HU|IS|IE|IT|LV|LI|LT|LU|MT|MD|MC|ME|MK|AN|NL|NO|PL|PT|RO|RU|SM|RS|SK|SI|ES|SE|CH|UA|UK", dfblack$countrycit), ]
 dfeurope_o <- dfother[grep("AL|AD|AT|BY|BE|BA|BG|HR|CZ|DK|EE|FI|FR|DE|GR|HU|IS|IE|IT|LV|LI|LT|LU|MT|MD|MC|ME|MK|AN|NL|NO|PL|PT|RO|RU|SM|RS|SK|SI|ES|SE|CH|UA|UK", dfother$countrycit), ]
 
+# Write the raw by ethnicity data
+write.csv(dfeurope_w, file.path(dataloc,"full-white-europe.csv"), row.names=FALSE, quote=FALSE)
+write.csv(dfeurope_b, file.path(dataloc,"full-black-europe.csv"), row.names=FALSE, quote=FALSE)
+write.csv(dfeurope_o, file.path(dataloc,"full-other-europe.csv"), row.names=FALSE, quote=FALSE)
+
+
+
 dfstats_w <- count(dfeurope_w,countrycit)
 dfstats_b <- count(dfeurope_b,countrycit)
 dfstats_o <- count(dfeurope_o,countrycit)
