@@ -20,18 +20,21 @@ First I looked at participants in the online IAT who identified as black, but th
 
 ![ ](IAT_by_ethnicity.png  "average IAT by country and ethnicity")
 
-I haven't plotted the confidence estimates around the mean values, since a) they would ruin the plot because they are so large and b) the individual values are interesting, but I think the overall pattern might be. (If you're the kind of person that likes to know error estimates then the data is [here](https://github.com/tomstafford/WorldBias/tree/master/Data)).
+I haven't plotted the confidence estimates around the mean values, since a) they would ruin the plot because they are so large and b) the individual values aren't interesting, but I think the overall pattern might be. (If you're the kind of person that likes to know error estimates then the data is [here](https://github.com/tomstafford/WorldBias/tree/master/Data)).
 
 So, what can we see?
 * All ethnicities, averaged across country, have (on average) negative implicit associations with blackness
 * Implicit associations for whites look like they are stronger than for non-whites
-* Average score for black participants are <0 in some countries, but that may just be because sample numbers are low enough (ie it is noise, not signal).
+* Average score for black participants are less than 0 in some countries, but that may just be because sample numbers are low enough (ie it is noise, not signal).
+* Could it be that there is some country specific factor? ie IAT scores of non-whites slope upwards as white IAT scores do? 
 
 For completeness, let's plot the normalised distributions of scores, for those three ethniticy categorised, aggegrating across countries:
 
 ![ ](hist_by_ethnicity.png  "Score distributions by ethnicity")
 
-Which fits with the US result, in that it puts the average IAT for black europeans centered almosts exactly on zero (neither positive nor negative associations, see Axt et al, 2014; Nosek et al, 2002).
+Which roughly fits the US result, in that it puts the average IAT for black europeans close to zero (see Axt et al, 2014; Nosek et al, 2002). If anything the European sample mean is closer to positive associations with blackness than negative.
+
+
 
 ## Links
 
