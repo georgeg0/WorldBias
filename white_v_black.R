@@ -47,7 +47,10 @@ constat_o$err <- constat_o$D_biep.White_Good_all[,c("sd")]/sqrt(constat_o$n)
 constat_w[!(constat_w$n<100),]
 
 # Write the consolidated file with Mean IAT score, country code, SD, SE and sample size (Good file to get Idea of data points)
-#write.csv(constat, file.path(dataloc,"Consolidatedstat.2004-2015-white-europe.csv"), row.names=FALSE, quote=FALSE)
+write.csv(constat_w, file.path(dataloc,"stats-white-europe.csv"), row.names=FALSE, quote=FALSE)
+write.csv(constat_b, file.path(dataloc,"stats-black-europe.csv"), row.names=FALSE, quote=FALSE)
+write.csv(constat_o, file.path(dataloc,"stats-other-europe.csv"), row.names=FALSE, quote=FALSE)
+
 
 constat_w <- constat_w[(constat_w$countrycit!='SM'),]
 
