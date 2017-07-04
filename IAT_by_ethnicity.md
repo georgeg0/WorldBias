@@ -39,7 +39,7 @@ Which roughly fits the US result, in that it puts the average IAT for black euro
 ## Links
 
 Read about our original map: 
-This map shows what white Europeans associate with race – and it makes for uncomfortable reading
+This map shows what white [Europeans associate with race – and it makes for uncomfortable reading]
 (https://theconversation.com/this-map-shows-what-white-europeans-associate-with-race-and-it-makes-for-uncomfortable-reading-76661)
 
 More detail, other maps and further reading on the [figshare site](https://figshare.com/articles/European_map_of_Implicit_Racial_Bias/4750588)
