@@ -20,12 +20,12 @@ library(modify)
  
 # set path for where data is
 
-if(TRUE) {
+if(FALSE) {
   setwd("/home/tom/Dropbox/WorldBias") #tom's computer
   dataloc='/home/tom/Dropbox/university/expts/WorldBias/data' #where a folder called /raw is
 } else { 
-  setwd("/george/Desktop/RACIAL-IAT/")
-  dataloc='/george/Desktop/RACIAL-IAT/data/cleansedtest'
+  setwd("/Users/ggeorge/Desktop/WorldBiasNew")
+  dataloc='/george/Desktop/RACIAL-IAT/data'
 }
 
 
@@ -131,7 +131,7 @@ mytheme <- gridExtra::ttheme_default(
   colhead = list(fg_params=list(cex = .5,col="white"), bg_params=list(fill="honeydew4")),
   rowhead = list(fg_params=list(cex = 0.5)))
 ## Drawing map along with the table and labels
-ggdraw(MapDraw) + draw_grob(tableGrob(countryfreqtable, rows=NULL,theme = mytheme),x=0.18, y=0.25, width=0.2, height=0.3)+draw_plot_label("*Countries with n<100 (SM,MC.LI,ME,AD,LU) are ignored to pick arbitrary breakpoint", x=0.46, y=0.03, vjust=-0.1, hjust=.8, size = 9, fontface = "italic")
+MapDrawWithStats <- ggdraw(MapDraw) + draw_grob(tableGrob(countryfreqtable, rows=NULL,theme = mytheme),x=0.18, y=0.25, width=0.2, height=0.3)+draw_plot_label("*Countries with n<100 (SM,MC.LI,ME,AD,LU) are ignored to pick arbitrary breakpoint", x=0.46, y=0.03, vjust=-0.1, hjust=.8, size = 9, fontface = "italic")
 
-ggsave(filename=paste(whichmap,".png",sep=""), plot=MapDraw)
+ggsave(filename=paste(whichmap,".png",sep=""), plot=MapDrawWithStats)
 
