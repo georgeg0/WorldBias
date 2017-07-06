@@ -29,11 +29,11 @@ library(dplyr)
 
 
 # ---------- Set path for a) where this file is and b) where the data is
-if(TRUE) {
+if(FALSE) {
   setwd("/home/tom/Dropbox/WorldBias") #tom's computer
   dataloc='/home/tom/Dropbox/university/expts/WorldBias/data' #where a folder called /raw is
 } else { 
-  setwd("/george/Desktop/RACIAL-IAT/")
+  setwd("/Users/ggeorge/Desktop/WorldBiasNew")
   dataloc='/george/Desktop/RACIAL-IAT/data'
 }
 
@@ -94,7 +94,7 @@ for (fileNumber in fileNumbers)
 # Seperating 2015 file to new format and old format files ##
 #
 
-df <- read.csv(file.path(dataloc,'cleansed',"Race IAT.public.2015.csv"), header=TRUE)
+df <- read.csv(file.path(dataloc,'cleansed',"RaceIAT_public_2015.csv"), header=TRUE)
 df2 <- df[grepl(pattern="[[:digit:]]", df$countrycit)|grepl(pattern="[[:digit:]]", df$countryres), ]
 dfdig <- df2[!grepl(pattern="-9", df2$countrycit), ]
 dfalp <- df[grepl(pattern="[[:alpha:]]", df$countrycit) & !grepl(pattern="[[:digit:]]", df$countryres), ]
